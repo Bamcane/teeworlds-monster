@@ -1094,7 +1094,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
 		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
 	{
-		pCharacter->m_Health = round((float)m_Health / (float)m_pPlayer->TotalHP() * 10.f);
+		pCharacter->m_Health = round_to_int((float)m_Health / (float)m_pPlayer->TotalHP() * 10.f);
 		pCharacter->m_Armor = m_Armor;
 		if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0)
         {

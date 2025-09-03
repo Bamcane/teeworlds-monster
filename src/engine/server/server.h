@@ -5,6 +5,18 @@
 
 #include <engine/server.h>
 
+#include <engine/map.h>
+#include <engine/shared/demo.h>
+#include <engine/shared/protocol.h>
+#include <engine/shared/snapshot.h>
+#include <engine/shared/network.h>
+#include <engine/server/register.h>
+#include <engine/shared/console.h>
+#include <base/math.h>
+#include <engine/shared/mapchecker.h>
+#include <engine/shared/econ.h>
+#include <engine/shared/netban.h>
+#include <engine/shared/http.h>
 
 class CSnapIDPool
 {
@@ -64,6 +76,8 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+	class IRegister *m_pRegister;
+
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -124,6 +138,11 @@ public:
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
+		bool IncludedInServerInfo() const
+		{
+			return m_State != STATE_EMPTY;
+		}
+
 		void Reset();
 	};
 
@@ -135,6 +154,7 @@ public:
 	CNetServer m_NetServer;
 	CEcon m_Econ;
 	CServerBan m_ServerBan;
+	CHttp m_Http;
 
 	IEngineMap *m_pMap;
 
@@ -151,12 +171,22 @@ public:
 
 	char m_aCurrentMap[64];
 	unsigned m_CurrentMapCrc;
+	SHA256_DIGEST m_CurrentMapSha256;
 	unsigned char *m_pCurrentMapData;
 	int m_CurrentMapSize;
 
+	int m_GeneratedRconPassword;
+
 	CDemoRecorder m_DemoRecorder;
-	CRegister m_Register;
-	CMapChecker m_MapChecker;
+
+	int m_RconRestrict;
+
+	bool m_ServerInfoHighLoad;
+	int64 m_ServerInfoFirstRequest;
+	int m_ServerInfoNumRequests;
+	int64_t m_ServerInfoRequestLogTick;
+	int m_ServerInfoRequestLogRecords;
+	bool m_ServerInfoNeedsUpdate;
 
 	CServer();
 
@@ -207,15 +237,19 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
-	void SendServerInfo(const NETADDR *pAddr, int Token);
-	void UpdateServerInfo();
+	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
+	void ExpireServerInfo() override;
+	void UpdateRegisterServerInfo();	
+
+	void UpdateServerInfo(bool Resend = false);
+	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 
 	void PumpNetwork();
 
 	char *GetMapName();
 	int LoadMap(const char *pMapName);
 
-	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole);
+	void InitInterfaces(IKernel *pKernel);
 	int Run();
 
 	static void ConKick(IConsole::IResult *pResult, void *pUser);
@@ -237,6 +271,7 @@ public:
 	virtual void SnapFreeID(int ID);
 	virtual void *SnapNewItem(int Type, int ID, int Size);
 	void SnapSetStaticsize(int ItemType, int Size);
+    void SendCapabilities(int ClientID);
 };
 
 #endif

@@ -33,6 +33,12 @@ static const unsigned char SERVERBROWSE_FWRESPONSE[] = {255, 255, 255, 255, 'f',
 static const unsigned char SERVERBROWSE_FWOK[] = {255, 255, 255, 255, 'f', 'w', 'o', 'k'};
 static const unsigned char SERVERBROWSE_FWERROR[] = {255, 255, 255, 255, 'f', 'w', 'e', 'r'};
 
+static const unsigned char SERVERBROWSE_GETINFO_64_LEGACY[] = {255, 255, 255, 255, 'f', 's', 't', 'd'};
+static const unsigned char SERVERBROWSE_INFO_64_LEGACY[] = {255, 255, 255, 255, 'd', 't', 's', 'f'};
+
+static const unsigned char SERVERBROWSE_INFO_EXTENDED[] = {255, 255, 255, 255, 'i', 'e', 'x', 't'};
+static const unsigned char SERVERBROWSE_INFO_EXTENDED_MORE[] = {255, 255, 255, 255, 'i', 'e', 'x', '+'};
+
 
 // packet headers for the 0.5 branch
 
@@ -49,4 +55,16 @@ static const unsigned char SERVERBROWSE_LIST_LEGACY[] = {255, 255, 255, 255, 'l'
 
 static const unsigned char SERVERBROWSE_GETCOUNT_LEGACY[] = {255, 255, 255, 255, 'c', 'o', 'u', 'n'};
 static const unsigned char SERVERBROWSE_COUNT_LEGACY[] = {255, 255, 255, 255, 's', 'i', 'z', 'e'};
-#endif
+
+enum
+{
+	SERVERINFO_VANILLA=0,
+	SERVERINFO_64_LEGACY,
+	SERVERINFO_EXTENDED,
+	SERVERINFO_EXTENDED_MORE,
+	SERVERINFO_INGAME,
+};
+
+static const unsigned char SERVERBROWSE_CHALLENGE[] = {255, 255, 255, 255, 'c', 'h', 'a', 'l'};
+
+#endif // ENGINE_SHARED_MASTERSERVER_H
